@@ -6,19 +6,21 @@ var timeoutPID;
 var inputElement;
 var canvasElement;
 var answerElement;
+var datalistElement;
 var marker;
 var RESET_TITLE;
 var RESET_CENTER;
 var RESET_ZOOM;
-var FOUNT_ZOOM;
+var FOUND_ZOOM;
 var RESET_NOT_FOUND = "No <b>neighborhood</b> found.";
 
 var initialize = function() {
     RESET_TITLE = document.title;
     RESET_CENTER = new google.maps.LatLng(41.875696, -87.624207);
     RESET_ZOOM = 12;
-    FOUNT_ZOOM = 15;
+    FOUND_ZOOM = 15;
     canvasElement = document.getElementsByTagName('div')[0];
+    datalistElement = document.getElementsByTagName('datalist')[0];
 
     navigator.geolocation.getCurrentPosition(
         function(position) {
@@ -59,6 +61,8 @@ var initialize = function() {
     var blur = function(event) {
         updateMap(this.value, true);
         ga('send', 'event', 'form', event.type);
+
+        event.preventDefault();
         return false;
     };
 
@@ -86,7 +90,7 @@ var centerMap = function() {
 
     if (marker != null) {
         position = marker.position;
-        zoom = FOUNT_ZOOM;
+        zoom = FOUND_ZOOM;
     }
 
     map.setCenter(position);
@@ -114,6 +118,26 @@ var searchLocation = function(address, toFormat) {
         return false;
     };
 
+    var findSuggestions = function(results) {
+        // var suggestions = [];
+        var i = 0;
+        // var l = results.length;
+        var l = 3;
+
+        // Clear list
+        datalistElement.innerHTML = '';
+
+        for(; i < l; i++) {
+            // suggestions.push(results[i].formatted_address);
+            var option = document.createElement('option');
+            option.value = results[i].formatted_address;
+            option.text = results[i].formatted_address;
+            datalistElement.appendChild(option);
+            // str += '<option value="' + results[i].formatted_address + '">' + results[i].formatted_address + '</option>';
+        }
+
+    };
+
     var callback = function(results, status) {
         if (status != google.maps.GeocoderStatus.OK) {
             resetMap();
@@ -121,8 +145,9 @@ var searchLocation = function(address, toFormat) {
             return;
         }
 
-        var result = results[0];
+        findSuggestions(results);
 
+        var result = results[0];
 
         var neighborhood = findType(result, 'neighborhood').long_name;
 
@@ -141,7 +166,7 @@ var searchLocation = function(address, toFormat) {
         ga('send', 'event', 'state', administrative_area_level_1);
         ga('send', 'event', 'neighborhood', neighborhood);
 
-        map.setZoom(FOUNT_ZOOM);
+        map.setZoom(FOUND_ZOOM);
         map.setCenter(result.geometry.location);
 
         if (marker == null) {
@@ -195,7 +220,7 @@ var updateNeighborhood = function(neighborhood) {
         return;
     }
 
-    var text = 'You live in ';
+    var text = 'You are in ';
 
     document.title = text + neighborhood + '.';
 
