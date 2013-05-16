@@ -1,4 +1,4 @@
-var TIMEOUT_TIME = 750;
+var TIMEOUT_TIME = 1000;
 
 var map;
 var geocoder;
