@@ -11,6 +11,7 @@ var RESET_TITLE;
 var RESET_CENTER;
 var RESET_ZOOM;
 var FOUNT_ZOOM;
+var RESET_NOT_FOUND = "No <b>neighborhood</b> found.";
 
 var initialize = function() {
     RESET_TITLE = document.title;
@@ -19,6 +20,17 @@ var initialize = function() {
     FOUNT_ZOOM = 15;
     canvasElement = document.getElementsByTagName('div')[0];
 
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            searchLocation(initialLocation);
+            ga('send', 'event', 'result', 'auto');
+        },
+        function() {
+            inputElement.className = 'invalid';
+            resetMap(RESET_NOT_FOUND);
+        }
+    );
 
     var mapOptions = {
         center: RESET_CENTER,
@@ -53,8 +65,9 @@ var initialize = function() {
     var updateMap = function(address, toFormat) {
         window.clearTimeout(timeoutPID);
 
+        resetMap('Searching...');
         timeoutPID = window.setTimeout(function() {
-            codeAddress(address, toFormat);
+            searchLocation(address, toFormat);
         }, TIMEOUT_TIME);
     };
 
@@ -80,7 +93,7 @@ var centerMap = function() {
     map.setZoom(zoom);
 };
 
-var codeAddress = function(address, toFormat) {
+var searchLocation = function(address, toFormat) {
     if (address.length === 0) {
         resetMap();
         return;
@@ -115,7 +128,7 @@ var codeAddress = function(address, toFormat) {
 
         if (!neighborhood || !neighborhood.length) {
             inputElement.className = 'invalid';
-            resetMap();
+            resetMap(RESET_NOT_FOUND);
             return;
         }
 
@@ -147,13 +160,25 @@ var codeAddress = function(address, toFormat) {
         }
     };
 
-    geocoder.geocode( { 'address': address }, callback);
+    var options = { 'address': address };
+
+    if (typeof address != 'string') {
+        options = { 'latLng': address };
+    }
+
+    geocoder.geocode(options, callback);
 };
 
-var resetMap = function() {
+var resetMap = function(message) {
     document.title = RESET_TITLE;
-    answerElement.style.display = 'none';
-    answerElement.innerHTML = '';
+
+    if (message) {
+        answerElement.style.display = 'block';
+        answerElement.innerHTML = message;
+    } else {
+        answerElement.style.display = 'none';
+        answerElement.innerHTML = '';
+    }
 
     if (marker) {
         marker.setMap(null);
@@ -170,19 +195,19 @@ var updateNeighborhood = function(neighborhood) {
         return;
     }
 
-    var text = 'You live in "' + neighborhood + '".';
+    var text = 'You live in ';
 
-    document.title = text;
+    document.title = text + neighborhood + '.';
 
     answerElement.style.display = 'block';
-    answerElement.innerHTML = text;
+    answerElement.innerHTML = text + '<b>' + neighborhood + '</b>.';
 
 };
 
 google.maps.event.addDomListener(window, 'load', initialize);
 google.maps.event.addDomListener(window, 'resize', centerMap);
 
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-40976307-3', 'dev.mn');ga('send', 'pageview');
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-40976307-2', 'dev.mn');ga('send', 'pageview');
 
 /**
  * Utility to wrap the different behaviors between W3C-compliant browsers
