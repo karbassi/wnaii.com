@@ -49,3 +49,11 @@ p {
     margin: 0;
     padding: 20px;
 }
+
+b {
+    background: #FF0;
+    background: rgba(255, 255, 0, 0.5);
+    padding: 10px;
+    margin: -10px;
+}
+
