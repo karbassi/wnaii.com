@@ -149,6 +149,8 @@ var searchLocation = function(address, toFormat) {
 
         var result = results[0];
 
+        console.log(result);
+
         var neighborhood = findType(result, 'neighborhood').long_name;
 
         if (!neighborhood || !neighborhood.length) {
