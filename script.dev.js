@@ -128,6 +128,10 @@ var searchLocation = function(address, toFormat) {
         datalistElement.innerHTML = '';
 
         for(; i < l; i++) {
+            if (results[i] == undefined) {
+                continue;
+            }
+
             // suggestions.push(results[i].formatted_address);
             var option = document.createElement('option');
             option.value = results[i].formatted_address;
@@ -149,9 +153,18 @@ var searchLocation = function(address, toFormat) {
 
         var result = results[0];
 
-        console.log(result);
+        console.log(results);
 
-        var neighborhood = findType(result, 'neighborhood').long_name;
+        var neighborhood = {};
+
+        for (var i = 0; i < results.length; i++) {
+            var hood = findType(results[i], 'neighborhood').long_name;
+            if (hood && hood.length > 0) {
+                neighborhood[hood] = true;
+            }
+        }
+
+        neighborhood = Object.keys(neighborhood);
 
         if (!neighborhood || !neighborhood.length) {
             inputElement.className = 'invalid';
@@ -224,10 +237,10 @@ var updateNeighborhood = function(neighborhood) {
 
     var text = 'You are in ';
 
-    document.title = text + neighborhood + '.';
+    document.title = text + neighborhood.join(', ') + '.';
 
     answerElement.style.display = 'block';
-    answerElement.innerHTML = text + '<b>' + neighborhood + '</b>.';
+    answerElement.innerHTML = text + '<b>' + neighborhood.join(', ') + '</b>.';
 
 };
 
