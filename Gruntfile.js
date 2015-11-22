@@ -9,9 +9,18 @@ module.exports = function(grunt) {
           relative: false
         }
       }
+    },
+    cssmin: {
+      target: {
+        files: {
+          'build/build.min.css': ['build/_bower.css']
+        }
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-bower-concat');
-  grunt.registerTask('default', ['bower_concat']);
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+
+  grunt.registerTask('default', ['bower_concat', 'cssmin']);
 };
