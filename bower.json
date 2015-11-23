@@ -6,6 +6,7 @@
     "bower_components"
   ],
   "dependencies": {
+    "jquery": "~2.1.4",
     "leaflet": "~0.7.7",
     "turf": "~2.0.2"
   }
