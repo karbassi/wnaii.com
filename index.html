@@ -3,16 +3,17 @@
   <head>
     <title>What neighborhood am I in?</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="build/build.min.css" />
     <link rel="stylesheet" href="style.css" />
-    <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
-    <script type="text/javascript" src="script.js"></script>
+    <script src="build/_bower.js" type="text/javascript"></script>
   </head>
   <body>
-    <div></div>
+    <div id="map"></div>
     <form action="#">
         <datalist id="addresses"><select name="addresses"></select></datalist>
         <input type="text" placeholder="Enter an address." list="addresses" />
     </form>
     <p></p>
   </body>
+  <script src="testscript.js" type="text/javascript"></script>
 </html>
