@@ -13,6 +13,7 @@ var API_RATE_LIMIT = 1000;
 /* TO-DO:
 - Build out error handling
 - Figure out workaround for datalist HTML only matching exactly
+- fix scoping so not everything is global
 */
 
 /*
@@ -70,15 +71,32 @@ inputElement.addEventListener('keyup', throttle(function() {
   }
 }, API_RATE_LIMIT));
 
-var pt = {
-  "type": "Feature",
-  "properties": {
-    "marker-color": "#0f0"
-  },
-  "geometry": {
-    "type": "Point",
-    "coordinates": [-87.663906, 41.968421]
-  }
+var coords = [];
+
+function searchNeighborhoods(position, neighborhoods) {
+  var pt = {
+    "type": "Feature",
+    "properties": {
+      "marker-color": "#0f0"
+    },
+    "geometry": {
+      "type": "Point",
+      "coordinates": []
+    }
+  };
+
+  pt["geometry"]["coordinates"] = [position.coords.longitude, position.coords.latitude];
+  console.log("coordinates are " + pt["geometry"]["coordinates"]);
+
+  for (var i = 0; i < neighborhoods.features.length; ++i) {
+    if (turf.inside(pt, neighborhoods.features[i])) {
+      console.log(chi_neighborhoods.features[i].properties.name);
+      break;
+    }
+    else if (i == neighborhoods.features.length - 1) {
+      console.log("outside Chicago");
+    }
+  };
 };
 
 $.ajax({
@@ -86,14 +104,14 @@ $.ajax({
   url: "chi-neighborhoods.geojson",
   success: function(data) {
     var chi_neighborhoods = data;
-
-    for (var i = 0; i < chi_neighborhoods.features.length; ++i) {
-      if (turf.inside(pt, chi_neighborhoods.features[i])) {
-        console.log(chi_neighborhoods.features[i].properties.name);
-        break;
-      }
-    };
-
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(position) {
+        searchNeighborhoods(position, chi_neighborhoods);
+      });
+    }
+    else {
+      console.log("geolocation not supported");
+    }
     //L.geoJson(chi_neighborhoods).addTo(map);
   }
 }).error(function() {});
