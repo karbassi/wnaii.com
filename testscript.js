@@ -1,3 +1,5 @@
+L.Icon.Default.imagePath = 'images';
+
 var map = L.map('map').setView([41.88, -87.63], 10);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -14,6 +16,7 @@ var API_RATE_LIMIT = 1000;
 - Build out error handling
 - Figure out workaround for datalist HTML only matching exactly
 - fix scoping so not everything is global
+- Make search functionality real
 */
 
 /*
@@ -88,13 +91,16 @@ function searchNeighborhoods(position, neighborhoods) {
   pt["geometry"]["coordinates"] = [position.coords.longitude, position.coords.latitude];
   console.log("coordinates are " + pt["geometry"]["coordinates"]);
 
+  var answerElement = document.getElementsByTagName('p')[0];
+  answerElement.style.display = 'block';
+
   for (var i = 0; i < neighborhoods.features.length; ++i) {
     if (turf.inside(pt, neighborhoods.features[i])) {
-      console.log(chi_neighborhoods.features[i].properties.name);
+      answerElement.innerHTML = "You are in " + '<b>' + chi_neighborhoods.features[i].properties.name + '</b>.';
       break;
     }
     else if (i == neighborhoods.features.length - 1) {
-      console.log("outside Chicago");
+      answerElement.innerHTML = "You are outside Chicago.";
     }
   };
 };
@@ -107,6 +113,8 @@ $.ajax({
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
         searchNeighborhoods(position, chi_neighborhoods);
+        var marker = L.marker([position.coords.latitude, position.coords.longitude]).addTo(map);
+        map.setView([position.coords.latitude, position.coords.longitude], 15);
       });
     }
     else {
