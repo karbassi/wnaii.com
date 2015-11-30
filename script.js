@@ -6,13 +6,14 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
+var markerLayer = L.geoJson().addTo(map);
+
 var mapzen_key = "search-F2Xk0nk";
 var auto_url = 'https://search.mapzen.com/v1/autocomplete';
 var search_url = 'https://search.mapzen.com/v1/search';
 var inputElement = document.getElementsByTagName('input')[0];
 var dataListEl = document.getElementsByTagName('datalist')[0];
-var formEl = document.getElementsByTagName('form')[0];
-var API_RATE_LIMIT = 1000;
+var API_RATE_LIMIT = 500;
 
 // Load geojson into variable to be used later,
 // async being false will be deprecated later, but works for now
@@ -36,8 +37,6 @@ window.onload = function() {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = [position.coords.latitude, position.coords.longitude];
       searchNeighborhoods(pos, chi_json);
-      var marker = L.marker([pos[0], pos[1]]).addTo(map);
-      map.setView([pos[0], pos[1]], 15);
     });
   }
   else {
@@ -119,8 +118,10 @@ function searchNeighborhoods(position, neighborhoods) {
   var answerElement = document.getElementsByTagName('p')[0];
   answerElement.style.display = 'block';
 
-  // Create point marker and add to map
-  var marker = L.marker([position[0], position[1]]).addTo(map);
+  // Clear any existing GeoJSON and add marker GeoJSON to existing layer
+  markerLayer.clearLayers();
+  markerLayer.addData(pt);
+  // marker = L.marker([position[0], position[1]]).addTo(map);
   map.setView([position[0], position[1]], 15);
 
   // Loop through all GeoJSON features, break if one selected, and change answerElement
