@@ -11,7 +11,7 @@
   </head>
   <body>
     <div id="map"></div>
-    <form action="#">
+    <form onsubmit="searchAddress(true); return false;"> 
         <datalist id="addresses"><select name="addresses"></select></datalist>
         <input type="text" placeholder="Enter an address." list="addresses" />
     </form>

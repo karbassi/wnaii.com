@@ -48,9 +48,6 @@ window.onload = function() {
 // Use existing throttle function to load autocomplete Mapzen results on keyup
 inputElement.addEventListener('keyup', throttle(searchAddress, API_RATE_LIMIT));
 
-// Use Mapzen search API on user hitting enter, give "true" argument to call to different endpoint
-formEl.addEventListener('submit', function() { searchAddress(true); });
-
 function searchAddress(submitAddr) {
   var params = {
     api_key: mapzen_key,
