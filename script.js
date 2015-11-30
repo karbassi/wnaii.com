@@ -15,6 +15,9 @@ var inputElement = document.getElementsByTagName('input')[0];
 var dataListEl = document.getElementsByTagName('datalist')[0];
 var API_RATE_LIMIT = 500;
 
+inputElement.disabled = true;
+inputElement.placeholder = "Getting location...";
+
 // Load geojson into variable to be used later,
 // async being false will be deprecated later, but works for now
 var chi_json = (function () {
@@ -37,10 +40,15 @@ window.onload = function() {
     navigator.geolocation.getCurrentPosition(function(position) {
       var pos = [position.coords.latitude, position.coords.longitude];
       searchNeighborhoods(pos, chi_json);
+      // Make input usable and change placeholder, included twice so that it waits for function completion
+      inputElement.placeholder = "Enter an address.";
+      inputElement.disabled = false;
     });
   }
   else {
     console.log("Geolocation is not supported");
+    inputElement.placeholder = "Enter an address.";
+    inputElement.disabled = false;
   }
 };
 
