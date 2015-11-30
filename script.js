@@ -18,6 +18,16 @@ var API_RATE_LIMIT = 500;
 inputElement.disabled = true;
 inputElement.placeholder = "Getting location...";
 
+var gjStyle = {
+    "color": "#ff0000",
+    "weight": 5,
+    "opacity": 0.65
+};
+
+function onEachFeature(feature, layer) {
+  layer.bindPopup("<strong>Neighborhood:</strong> " + feature.properties.name);
+};
+
 // Load geojson into variable to be used later,
 // async being false will be deprecated later, but works for now
 var chi_json = (function () {
@@ -29,6 +39,10 @@ var chi_json = (function () {
         'dataType': "json",
         'success': function (data) {
             chi_json = data;
+            L.geoJson(chi_json, {
+              style: gjStyle,
+              onEachFeature: onEachFeature
+            }).addTo(map);
         }
     });
     return chi_json;
