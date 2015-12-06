@@ -11,6 +11,7 @@ var markerLayer = L.geoJson().addTo(map);
 var mapzen_key = "search-F2Xk0nk";
 var auto_url = 'https://search.mapzen.com/v1/autocomplete';
 var search_url = 'https://search.mapzen.com/v1/search';
+var reverse_url = 'https://search.mapzen.com/v1/reverse';
 var inputElement = document.getElementsByTagName('input')[0];
 var dataListEl = document.getElementsByTagName('datalist')[0];
 var API_RATE_LIMIT = 500;
@@ -147,13 +148,33 @@ function searchNeighborhoods(position, neighborhoods) {
   map.setView([position[0], position[1]], 15);
 
   // Loop through all GeoJSON features, break if one selected, and change answerElement
-  for (var i = 0; i < neighborhoods.features.length; ++i) {
-    if (turf.inside(pt, neighborhoods.features[i])) {
+  for (var i = 0; i <= neighborhoods.features.length; ++i) {
+    if (i == neighborhoods.features.length) {
+      // if have gone through all neighborhoods and can't find, use Mapzen reverse
+      // geocoder to pull a neighborhood name
+      $.ajax({
+          'url': reverse_url,
+          'data': {
+            "api_key": mapzen_key,
+            "point.lat": position[0],
+            "point.lon": position[1]
+          },
+          'dataType': "json",
+          'success': function (data) {
+              var neighborhood = data.features[0]["properties"]["neighbourhood"];
+              // check to make sure neighborhood is defined, display if so
+              if (typeof neighborhood !== "undefined") {
+                answerElement.innerHTML = "You are in " + '<b>' + neighborhood + '</b>.';
+              }
+              else {
+                answerElement.innerHTML = "Neighborhood can't be found";
+              }
+          }
+      });
+    }
+    else if (turf.inside(pt, neighborhoods.features[i])) {
       answerElement.innerHTML = "You are in " + '<b>' + neighborhoods.features[i].properties.name + '</b>.';
       break;
-    }
-    else {
-      answerElement.innerHTML = "You are outside Chicago";
     }
   };
 };
