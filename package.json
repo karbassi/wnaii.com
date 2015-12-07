@@ -2,9 +2,21 @@
   "name": "wnaii.com",
   "version": "1.0.0",
   "devDependencies": {
+    "bower": "^1.6.9",
     "grunt": "^0.4.5",
     "grunt-bower-concat": "^0.6.0",
+    "grunt-cli": "^0.1.13",
     "grunt-contrib-cssmin": "^0.14.0",
     "grunt-contrib-uglify": "^0.11.0"
-  }
+  },
+  "description": "What Neighborhood Am I In?",
+  "dependencies": {},
+  "scripts": {
+    "postinstall": "./node_modules/bower/bin/bower install && ./node_modules/grunt-cli/bin/grunt"
+  },
+  "author": [
+    "Ali Karbassi <ali@karbassi.com>",
+    "Pat Sier"
+  ],
+  "license": "MIT"
 }

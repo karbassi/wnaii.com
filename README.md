@@ -15,8 +15,7 @@ In order to download and contribute, clone the repo, and run:
 
 ```
 cd wnaii.com
-bower install
-grunt
+npm install
 ```
 
 Then, in order to run it on a local web server, run:
