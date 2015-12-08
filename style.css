@@ -65,11 +65,20 @@ b {
     margin: -10px;
 }
 
+/* Override Leaflet image path CSS */
+a.leaflet-control-layers-toggle {
+	background-image: url(bower_components/leaflet/dist/images/layers.png) !important;
+}
+
+a.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(bower_components/leaflet/dist/images/layers-2x.png) !important;
+}
+
 /* Smartphones (portrait and landscape) ----------- */
 @media only screen and (min-width: 320px) and (max-width: 480px) {
     input {
-        top: 10px;
-        left: 2%;
+        top: 80px;
+        left: 5%;
         width: 80%;
         max-width: 400px;
         min-width: none;
