@@ -1,6 +1,6 @@
-L.Icon.Default.imagePath = 'images';
-
 var map = L.map('map').setView([41.88, -87.63], 10);
+
+L.Icon.Default.imagePath = '/bower_components/leaflet/dist/images';
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -21,7 +21,7 @@ inputElement.placeholder = "Getting location...";
 
 var gjStyle = {
     "color": "#ff0000",
-    "weight": 5,
+    "weight": 1.5,
     "opacity": 0.65
 };
 
@@ -40,10 +40,12 @@ var chi_json = (function () {
         'dataType': "json",
         'success': function (data) {
             chi_json = data;
-            L.geoJson(chi_json, {
+            var chigeo = L.geoJson(chi_json, {
               style: gjStyle,
               onEachFeature: onEachFeature
-            }).addTo(map);
+            });
+            var overlay = { "Boundaries": chigeo };
+            L.control.layers(null, overlay).addTo(map);
         }
     });
     return chi_json;
