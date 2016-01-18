@@ -13,7 +13,7 @@ body {
   height: 100%;
 }
 
-input {
+input[type="text"] {
     margin: 0 0 10px 0;
     padding: 15px;
     width: 100%;
@@ -31,7 +31,7 @@ input {
     box-shadow: inset 0 0 8px rgba(0,0,0,0.1), 0 0 16px rgba(0,0,0,0.1);
 }
 
-input:focus {
+input[type="text"]:focus {
     outline: none;
 }
 
@@ -67,11 +67,11 @@ b {
 
 /* Override Leaflet image path CSS */
 a.leaflet-control-layers-toggle {
-	background-image: url(bower_components/leaflet/dist/images/layers.png) !important;
+	background-image: url(bower_components/leaflet/dist/images/layers.png);
 }
 
 a.leaflet-retina .leaflet-control-layers-toggle {
-	background-image: url(bower_components/leaflet/dist/images/layers-2x.png) !important;
+	background-image: url(bower_components/leaflet/dist/images/layers-2x.png);
 }
 
 /* Smartphones (portrait and landscape) ----------- */
