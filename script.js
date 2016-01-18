@@ -44,7 +44,7 @@ var chi_json = (function () {
               style: gjStyle,
               onEachFeature: onEachFeature
             });
-            var overlay = { "Boundaries": chigeo };
+            var overlay = { "Neighborhoods": chigeo };
             L.control.layers(null, overlay).addTo(map);
         }
     });
