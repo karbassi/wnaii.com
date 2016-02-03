@@ -11,11 +11,10 @@
   </head>
   <body>
     <div id="map"></div>
-    <form onsubmit="searchAddress(true); return false;">
-        <datalist id="addresses"><select name="addresses"></select></datalist>
-        <input type="text" list="addresses" />
-    </form>
-    <p></p>
+    <div id="search-container">
+      <input class="typeahead" id="addr-search" type="text">
+    </div>
+    <p id="geo-result"></p>
   </body>
   <script src="script.js" type="text/javascript"></script>
 </html>
