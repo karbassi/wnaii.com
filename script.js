@@ -173,8 +173,10 @@ function searchNeighborhoods(position, neighborhoods) {
           url: reverse_url,
           data: {
             api_key: mapzen_key,
-            "point.lat": position[0],
-            "point.lon": position[1]
+            point: {
+              lat: position[0],
+              lon: position[1]
+            }
           },
           dataType: "json",
           success: function (data) {
