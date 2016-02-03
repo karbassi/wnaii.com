@@ -9,9 +9,9 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 var markerLayer = L.geoJson().addTo(map);
 
 var gjStyle = {
-    "color": "#ff0000",
-    "weight": 1.5,
-    "opacity": 0.65
+    color: "#ff0000",
+    weight: 1.5,
+    opacity: 0.65
 };
 
 function onEachFeature(feature, layer) {
@@ -23,11 +23,11 @@ function onEachFeature(feature, layer) {
 var chi_json = (function () {
     var chi_json = null;
     $.ajax({
-        'async': false,
-        'global': false,
-        'url': "chi_neighborhoods.geojson",
-        'dataType': "json",
-        'success': function (data) {
+        async: false,
+        global: false,
+        url: "chi_neighborhoods.geojson",
+        dataType: "json",
+        success: function (data) {
             chi_json = data;
             var chigeo = L.geoJson(chi_json, {
               style: gjStyle,
@@ -142,17 +142,17 @@ inputElement.addEventListener('keyup', throttle(searchAddress, API_RATE_LIMIT));
 function searchNeighborhoods(position, neighborhoods) {
   // create arbitrary geoJSON point to submit to turfjs function
   var pt = {
-    "type": "Feature",
-    "properties": {
+    type: "Feature",
+    properties: {
       "marker-color": "#0f0"
     },
-    "geometry": {
-      "type": "Point",
-      "coordinates": []
+    geometry: {
+      type: "Point",
+      coordinates: []
     }
   };
 
-  pt["geometry"]["coordinates"] = [position[1], position[0]];
+  pt.geometry.coordinates = [position[1], position[0]];
 
   // Get var of p tag that will hold neighborhood answer
   var answerElement = document.getElementById('geo-result');
@@ -170,15 +170,15 @@ function searchNeighborhoods(position, neighborhoods) {
       // if have gone through all neighborhoods and can't find, use Mapzen reverse
       // geocoder to pull a neighborhood name
       $.ajax({
-          'url': reverse_url,
-          'data': {
-            "api_key": mapzen_key,
+          url: reverse_url,
+          data: {
+            api_key: mapzen_key,
             "point.lat": position[0],
             "point.lon": position[1]
           },
-          'dataType': "json",
-          'success': function (data) {
-              var neighborhood = data.features[0]["properties"]["neighbourhood"];
+          dataType: "json",
+          success: function (data) {
+              var neighborhood = data.features[0].properties.neighbourhood;
               // check to make sure neighborhood is defined, display if so
               if (typeof neighborhood !== "undefined") {
                 answerElement.innerHTML = "You are in " + '<b>' + neighborhood + '</b>.';
