@@ -119,7 +119,7 @@ function callMapzen(url, search_params) {
       }
     },
     error: function(err) {
-      console.log(err);
+      console.error(err.responseText);
     }
   });
 }
