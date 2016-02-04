@@ -3,6 +3,6 @@ machine:
     version: 0.10.33
 deployment:
   production:
-    branch: master
+    branch: feature/circleci
     commands:
       - ./.deploy/deploy.sh
