@@ -8,21 +8,10 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 
 var markerLayer = L.geoJson().addTo(map);
 
-var mapzen_key = "search-F2Xk0nk";
-var auto_url = 'https://search.mapzen.com/v1/autocomplete';
-var search_url = 'https://search.mapzen.com/v1/search';
-var reverse_url = 'https://search.mapzen.com/v1/reverse';
-var inputElement = document.getElementsByTagName('input')[0];
-var dataListEl = document.getElementsByTagName('datalist')[0];
-var API_RATE_LIMIT = 500;
-
-inputElement.disabled = true;
-inputElement.placeholder = "Getting location...";
-
 var gjStyle = {
-    "color": "#ff0000",
-    "weight": 1.5,
-    "opacity": 0.65
+    color: "#ff0000",
+    weight: 1.5,
+    opacity: 0.65
 };
 
 function onEachFeature(feature, layer) {
@@ -34,11 +23,11 @@ function onEachFeature(feature, layer) {
 var chi_json = (function () {
     var chi_json = null;
     $.ajax({
-        'async': false,
-        'global': false,
-        'url': "chi_neighborhoods.geojson",
-        'dataType': "json",
-        'success': function (data) {
+        async: false,
+        global: false,
+        url: "chi_neighborhoods.geojson",
+        dataType: "json",
+        success: function (data) {
             chi_json = data;
             var chigeo = L.geoJson(chi_json, {
               style: gjStyle,
@@ -69,8 +58,32 @@ window.onload = function() {
   }
 };
 
-// Use existing throttle function to load autocomplete Mapzen results on keyup
-inputElement.addEventListener('keyup', throttle(searchAddress, API_RATE_LIMIT));
+var API_RATE_LIMIT = 500;
+var inputElement = document.getElementById("addr-search");
+inputElement.disabled = true;
+inputElement.placeholder = "Getting location...";
+
+var mapzen_key = "search-F2Xk0nk";
+var auto_url = 'https://search.mapzen.com/v1/autocomplete';
+var search_url = 'https://search.mapzen.com/v1/search';
+
+var addresses = [];
+
+var addr_matches = new Bloodhound({
+  datumTokenizer: Bloodhound.tokenizers.whitespace,
+  queryTokenizer: Bloodhound.tokenizers.whitespace,
+  local: addresses
+});
+
+$('.typeahead').typeahead({
+  hint: true,
+  highlight: true,
+  minLength: 1
+},
+{
+  name: 'addresses',
+  source: addr_matches
+});
 
 function searchAddress(submitAddr) {
   var params = {
@@ -81,66 +94,68 @@ function searchAddress(submitAddr) {
   };
   // if optional argument supplied, call search endpoint
   if (submitAddr === true) {
-    callPelias(search_url, params);
+    callMapzen(search_url, params);
   }
   else if (inputElement.value.length > 0) {
-    callPelias(auto_url, params);
+    callMapzen(auto_url, params);
   }
 };
 
-function callPelias(url, search_params) {
-  AJAX.request(url, search_params, function (err, results) {
-    if (err) {
-      console.log(err);
-    }
-    // if autocomplete url provided
-    if (url === auto_url) {
-      if (results && results.features) {
-        // remove all children of datalist until empty, fast way of emptying
-        while (dataListEl.firstChild) {
-          dataListEl.removeChild(dataListEl.firstChild);
-        };
-        var optionLength = 5;
-        if (results.features.length < 5) {
-          optionLength = results.features.length;
+function callMapzen(url, search_params) {
+  $.ajax({
+    url: url,
+    data: search_params,
+    dataType: "json",
+    success: function(data) {
+      if (url === auto_url && data.features.length > 0) {
+        addr_matches.clear();
+        addr_matches.add(data.features.map(function(addr) {return addr.properties.label}));
+      }
+      else if (url === search_url) {
+        if (data && data.features) {
+          var pos = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
+          searchNeighborhoods(pos, chi_json);
         }
-        // Loop through first five results (or fewer) and add to options
-        // TO-DO: Figure out how to display options that aren't datalist exact matches
-        for (var i = 0; i < optionLength; ++i) {
-          var option = document.createElement('option');
-          option.value = results.features[i].properties.label;
-          option.text = results.features[i].properties.label;
-          dataListEl.appendChild(option);
-        };
       }
-    }
-    // If search url provided
-    else if (url === search_url) {
-      if (results && results.features) {
-        var pos = [results.features[0].geometry.coordinates[1], results.features[0].geometry.coordinates[0]];
-        searchNeighborhoods(pos, chi_json);
-      }
+    },
+    error: function(err) {
+      console.error(err.responseText);
     }
   });
-};
+}
+
+inputElement.addEventListener('keyup', throttle(searchAddress, API_RATE_LIMIT));
+
+$('.typeahead').bind('typeahead:select', function(ev, suggestion) {
+  searchAddress(true);
+});
+
+$(".typeahead").keyup(function (e) {
+  if (e.keyCode == 13) {
+    searchAddress(true);
+  }
+});
+
+// Use existing throttle function to load autocomplete Mapzen results on keyup
+inputElement.addEventListener('keyup', throttle(searchAddress, API_RATE_LIMIT));
 
 function searchNeighborhoods(position, neighborhoods) {
   // create arbitrary geoJSON point to submit to turfjs function
   var pt = {
-    "type": "Feature",
-    "properties": {
+    type: "Feature",
+    properties: {
       "marker-color": "#0f0"
     },
-    "geometry": {
-      "type": "Point",
-      "coordinates": []
+    geometry: {
+      type: "Point",
+      coordinates: []
     }
   };
 
-  pt["geometry"]["coordinates"] = [position[1], position[0]];
+  pt.geometry.coordinates = [position[1], position[0]];
 
   // Get var of p tag that will hold neighborhood answer
-  var answerElement = document.getElementsByTagName('p')[0];
+  var answerElement = document.getElementById('geo-result');
   answerElement.style.display = 'block';
 
   // Clear any existing GeoJSON and add marker GeoJSON to existing layer
@@ -155,15 +170,17 @@ function searchNeighborhoods(position, neighborhoods) {
       // if have gone through all neighborhoods and can't find, use Mapzen reverse
       // geocoder to pull a neighborhood name
       $.ajax({
-          'url': reverse_url,
-          'data': {
-            "api_key": mapzen_key,
-            "point.lat": position[0],
-            "point.lon": position[1]
+          url: reverse_url,
+          data: {
+            api_key: mapzen_key,
+            point: {
+              lat: position[0],
+              lon: position[1]
+            }
           },
-          'dataType': "json",
-          'success': function (data) {
-              var neighborhood = data.features[0]["properties"]["neighbourhood"];
+          dataType: "json",
+          success: function (data) {
+              var neighborhood = data.features[0].properties.neighbourhood;
               // check to make sure neighborhood is defined, display if so
               if (typeof neighborhood !== "undefined") {
                 answerElement.innerHTML = "You are in " + '<b>' + neighborhood + '</b>.';
