@@ -8,6 +8,6 @@ test:
 
 deployment:
   production:
-    branch: feature/circleci
+    branch: master
     commands:
       - ./.deploy/deploy.sh
