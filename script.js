@@ -66,6 +66,7 @@ inputElement.placeholder = "Getting location...";
 var mapzen_key = "search-6xXbnNY";
 var auto_url = 'https://search.mapzen.com/v1/autocomplete';
 var search_url = 'https://search.mapzen.com/v1/search';
+var reverse_url = 'https://search.mapzen.com/v1/reverse';
 
 var addresses = [];
 
@@ -173,10 +174,8 @@ function searchNeighborhoods(position, neighborhoods) {
           url: reverse_url,
           data: {
             api_key: mapzen_key,
-            point: {
-              lat: position[0],
-              lon: position[1]
-            }
+            "point.lat": position[0],
+            "point.lon": position[1]
           },
           dataType: "json",
           success: function (data) {
