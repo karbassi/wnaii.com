@@ -21,7 +21,7 @@ npm install
 Then, in order to run it on a local web server, run:
 
 ```
-python -m SimpleHTTPServer 8000
+python -m SimpleHTTPServer
 ```
 
 And navigate to http://localhost:8000
