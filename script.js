@@ -2,7 +2,7 @@ var map = L.map('map').setView([41.88, -87.63], 10);
 
 L.Icon.Default.imagePath = '/bower_components/leaflet/dist/images';
 
-L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
