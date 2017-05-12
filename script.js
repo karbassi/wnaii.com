@@ -100,39 +100,21 @@ $('.typeahead').typeahead({
   source: addr_matches
 });
 
-function searchAddress(submitAddr) {
+function searchAddress() {
   var params = {
     api_key: mapzen_key,
     "focus.point.lon": -87.63,
     "focus.point.lat": 41.88,
     text: inputElement.value
   };
-  var url = null;
-  // if optional argument supplied, call search endpoint
-  if (submitAddr === true) {
-    url = search_url;
-  }
-  else if (inputElement.value.length > 0) {
-    url = auto_url;
-  }
-  // Exit function if neither condition is met, otherwise call API
-  else {
-    return;
-  }
   $.ajax({
-    url: url,
+    url: search_url,
     data: params,
     dataType: "json",
     success: function(data) {
-      if (url === auto_url && data.features.length > 0) {
-        addr_matches.clear();
-        addr_matches.add(data.features.map(function(addr) {return addr.properties.label}));
-      }
-      else if (url === search_url) {
-        if (data && data.features) {
-          var pos = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
-          searchNeighborhoods(pos, chi_json);
-        }
+      if (data && data.features) {
+        var pos = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
+        searchNeighborhoods(pos, chi_json);
       }
     },
     error: function(err) {
@@ -142,12 +124,12 @@ function searchAddress(submitAddr) {
 };
 
 $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
-  searchAddress(true);
+  searchNeighborhoods(suggestion.geometry.coordinates.reverse(), chi_json);
 });
 
 $(".typeahead").keyup(function (e) {
   if (e.keyCode == 13) {
-    searchAddress(true);
+    searchAddress();
   }
 });
 
