@@ -1,6 +1,5 @@
 var mapzen_key = "search-6xXbnNY";
 var auto_url = 'https://search.mapzen.com/v1/autocomplete';
-var search_url = 'https://search.mapzen.com/v1/search';
 var reverse_url = 'https://search.mapzen.com/v1/reverse';
 var fLat = 41.88;
 var fLon = -87.63;
@@ -35,7 +34,10 @@ function onEachFeature(feature, layer) {
 function loadGeolocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = [position.coords.latitude, position.coords.longitude];
+      var pos = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude
+      };
       searchNeighborhoods(pos, chi_json);
       inputElement.placeholder = "Enter an address.";
     });
@@ -100,40 +102,15 @@ $('.typeahead').typeahead({
   source: addr_matches
 });
 
-function searchAddress() {
-  var params = {
-    api_key: mapzen_key,
-    "focus.point.lon": -87.63,
-    "focus.point.lat": 41.88,
-    text: inputElement.value
-  };
-  $.ajax({
-    url: search_url,
-    data: params,
-    dataType: "json",
-    success: function(data) {
-      if (data && data.features) {
-        var pos = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
-        searchNeighborhoods(pos, chi_json);
-      }
-    },
-    error: function(err) {
-      console.error(err.responseText);
-    }
-  });
-};
-
 $('.typeahead').bind('typeahead:select', function(ev, suggestion) {
-  searchNeighborhoods(suggestion.geometry.coordinates.reverse(), chi_json);
+  var pos = {
+    lat: suggestion.geometry.coordinates[1],
+    lon: suggestion.geometry.coordinates[0]
+  };
+  searchNeighborhoods(pos, chi_json);
 });
 
-$(".typeahead").keyup(function (e) {
-  if (e.keyCode == 13) {
-    searchAddress();
-  }
-});
-
-function searchNeighborhoods(position, neighborhoods) {
+function searchNeighborhoods(pos, neighborhoods) {
   // create arbitrary geoJSON point to submit to turfjs function
   var pt = {
     type: "Feature",
@@ -146,7 +123,7 @@ function searchNeighborhoods(position, neighborhoods) {
     }
   };
 
-  pt.geometry.coordinates = [position[1], position[0]];
+  pt.geometry.coordinates = [pos.lon, pos.lat];
 
   // Get var of p tag that will hold neighborhood answer
   var answerElement = document.getElementById('geo-result');
@@ -155,7 +132,7 @@ function searchNeighborhoods(position, neighborhoods) {
   // Clear any existing GeoJSON and add marker GeoJSON to existing layer
   markerLayer.clearLayers();
   markerLayer.addData(pt);
-  map.setView([position[0], position[1]], 15);
+  map.setView([pos.lat, pos.lon], 15);
 
   // Loop through all GeoJSON features, break if one selected, and change answerElement
   for (var i = 0; i <= neighborhoods.features.length; ++i) {
@@ -166,11 +143,12 @@ function searchNeighborhoods(position, neighborhoods) {
           url: reverse_url,
           data: {
             api_key: mapzen_key,
-            "point.lat": position[0],
-            "point.lon": position[1]
+            "point.lat": pos.lat,
+            "point.lon": pos.lon
           },
           dataType: "json",
           success: function (data) {
+            if (data.features.length > 0) {
               var neighborhood = data.features[0].properties.neighbourhood;
               // check to make sure neighborhood is defined, display if so
               if (typeof neighborhood !== "undefined") {
@@ -179,6 +157,10 @@ function searchNeighborhoods(position, neighborhoods) {
               else {
                 answerElement.innerHTML = "Neighborhood can't be found";
               }
+            }
+            else {
+              answerElement.innerHTML = "Neighborhood can't be found";
+            }
           }
       });
     }
