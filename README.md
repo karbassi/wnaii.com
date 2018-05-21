@@ -7,7 +7,7 @@ for the neighborhoods of other addresses, and see an overall map of Chicago's ne
 
 Application is live at http://wnaii.com/
 
-Neighborhood Boundaries provided by [this dataset from the City of Chicago's Open Data Portal.](https://data.cityofchicago.org/Facilities-Geographic-Boundaries/Boundaries-Neighborhoods/bbvz-uum9)
+Neighborhood Boundaries provided by [EveryBlock API]
 
 ## Setup
 
@@ -25,3 +25,5 @@ python -m SimpleHTTPServer 8000
 ```
 
 And navigate to http://localhost:8000
+
+[EveryBlock API]: 

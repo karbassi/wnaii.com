@@ -1,174 +1,128 @@
-var mapzen_key = "search-6xXbnNY";
-var auto_url = 'https://search.mapzen.com/v1/autocomplete';
-var reverse_url = 'https://search.mapzen.com/v1/reverse';
-var fLat = 41.88;
-var fLon = -87.63;
-var API_RATE_LIMIT = 500;
-var chi_json;
+const DATA_URL = 'https://api.everyblock.com/gis/chicago/neighborhoods/?token=0d872f36b2dfaa25bd2d0d6382022b47ed53078f';
 
-var full_auto_url = auto_url + "?api_key=" + mapzen_key;
-full_auto_url += "&focus.point.lon=" + fLon + "&focus.point.lat=" + fLat + "&text=";
+let focusLat = 41.88;
+let focusLon = -87.63;
 
-var map = L.map('map').setView([41.88, -87.63], 10);
+let loadingElement = document.getElementById('loading');
+let resultsElement = document.getElementById('found');
+let locationElement = document.getElementById('location');
 
-L.Icon.Default.imagePath = '/bower_components/leaflet/dist/images';
+let neighborhoods;
+let map;
+let markerLayer;
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+function createMap() {
+	if (map !== undefined) {
+		return;
+	}
 
-var markerLayer = L.geoJson().addTo(map);
-var gjStyle = {
-    color: "#ff0000",
-    weight: 1.5,
-    opacity: 0.65
-};
+	map = L.map('map', {
+		'center': [focusLat, focusLon],
+		'zoom': 15,
+		'attributionControl': false,
+	});
 
-var inputElement = document.getElementById("addr-search");
-inputElement.placeholder = "Getting location...";
+	L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png').addTo(map);
 
-function onEachFeature(feature, layer) {
-  layer.bindPopup("<strong>Neighborhood:</strong> " + feature.properties.name);
-};
-
-function loadGeolocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = {
-        lat: position.coords.latitude,
-        lon: position.coords.longitude
-      };
-      searchNeighborhoods(pos, chi_json);
-      inputElement.placeholder = "Enter an address.";
-    });
-  }
-  else {
-    console.log("Geolocation is not supported");
-    inputElement.placeholder = "Enter an address.";
-  }
+	markerLayer = L.geoJson().addTo(map);
 }
 
-// use HTML5 geolocation on page load, otherwise throw error
-window.onload = function() {
-  $.ajax({
-      url: "chi_neighborhoods.geojson",
-      dataType: "json",
-      success: function (data) {
-          chi_json = data;
-          var chigeo = L.geoJson(chi_json, {
-            style: gjStyle,
-            onEachFeature: onEachFeature
-          });
-          var overlay = { "Neighborhoods": chigeo };
-          L.control.layers(null, overlay).addTo(map);
-          // Load geolocation check
-          loadGeolocation();
-      }
-  });
-};
 
-var addr_matches = new Bloodhound({
-  datumTokenizer: Bloodhound.tokenizers.obj.whitespace("label"),
-  queryTokenizer: Bloodhound.tokenizers.whitespace,
-  remote: {
-      url: full_auto_url,
-      rateLimitBy: "throttle",
-      rateLimitWait: API_RATE_LIMIT,
-      replace: function() {
-        var val = inputElement.value;
-        var processed_url = full_auto_url + encodeURIComponent(val);
-        return processed_url;
-      },
-      transform: function(response) {
-        response.features.map(function(addr) {
-            addr.label = addr.properties.label;
-            return addr;
-          });
-        return response.features;
-      }
-    }
+function searchNeighborhoods() {
+
+	if (neighborhoods === undefined) {
+		setTimeout(() => {
+			searchNeighborhoods();
+		}, 10);
+		return;
+	}
+
+	// Create arbitrary geoJSON point to submit to turfjs function
+	const pt = {
+		type: 'Feature',
+		properties: {
+			'marker-color': '#00FF00'
+		},
+		geometry: {
+			type: 'Point',
+			coordinates: [focusLon, focusLat]
+		}
+	};
+
+
+	markerLayer.addData(pt);
+	map.setView([focusLat, focusLon], 15);
+
+	// Loop through all GeoJSON features, break if one selected, and change answerElement
+	for (let i = 0; i <= neighborhoods.features.length; ++i) {
+		let feature = neighborhoods.features[i];
+		if (gju.pointInPolygon(pt.geometry, feature.geometry)) {
+			// Get var of p tag that will hold neighborhood answer
+			loadingElement.style.display = 'none';
+			resultsElement.style.display = 'block';
+
+			locationElement.innerText = feature.properties.name;
+			break;
+		}
+	}
+}
+
+function loadGeolocation() {
+	const success = position => {
+		focusLat = position.coords.latitude;
+		focusLon = position.coords.longitude;
+		searchNeighborhoods();
+	};
+
+	const error = err => {
+		console.warn(`ERROR(${err.code}): ${err.message}`);
+	};
+
+	const options = {
+		enableHighAccuracy: true,
+		timeout: 5000,
+		maximumAge: 0
+	};
+
+	navigator.geolocation.getCurrentPosition(success, error, options);
+}
+
+function parseGeoDate(data) {
+	neighborhoods = data.data;
+
+	function onEachFeature(feature, layer) {
+		layer.bindPopup(
+			`<strong>Neighborhood:</strong> ${feature.properties.name}`
+		);
+	}
+
+	const chigeo = L.geoJson(neighborhoods, {
+		style: {
+			color: '#ff0000',
+			weight: 1.5,
+			opacity: 0.65
+		},
+		onEachFeature
+	});
+
+
+	map.addLayer(chigeo);
+
+	const overlay = {
+		Neighborhoods: chigeo
+	};
+
+	L.control.layers(null, overlay).addTo(map);
+}
+
+createMap();
+
+// Use HTML5 geolocation on page load, otherwise throw error
+window.addEventListener('load', () => {
+	// Load geolocation check
+	loadGeolocation();
+
+	fetch(DATA_URL)
+		.then(response => response.json())
+		.then(parseGeoDate);
 });
-
-addr_matches.initialize();
-
-$('.typeahead').typeahead({
-  hint: true,
-  highlight: true,
-  minLength: 2
-},
-{
-  name: 'addresses',
-  display: 'label',
-  source: addr_matches
-});
-
-$('.typeahead').bind('typeahead:select', function(ev, suggestion) {
-  var pos = {
-    lat: suggestion.geometry.coordinates[1],
-    lon: suggestion.geometry.coordinates[0]
-  };
-  searchNeighborhoods(pos, chi_json);
-});
-
-function searchNeighborhoods(pos, neighborhoods) {
-  // create arbitrary geoJSON point to submit to turfjs function
-  var pt = {
-    type: "Feature",
-    properties: {
-      "marker-color": "#0f0"
-    },
-    geometry: {
-      type: "Point",
-      coordinates: []
-    }
-  };
-
-  pt.geometry.coordinates = [pos.lon, pos.lat];
-
-  // Get var of p tag that will hold neighborhood answer
-  var answerElement = document.getElementById('geo-result');
-  answerElement.style.display = 'block';
-
-  // Clear any existing GeoJSON and add marker GeoJSON to existing layer
-  markerLayer.clearLayers();
-  markerLayer.addData(pt);
-  map.setView([pos.lat, pos.lon], 15);
-
-  // Loop through all GeoJSON features, break if one selected, and change answerElement
-  for (var i = 0; i <= neighborhoods.features.length; ++i) {
-    if (i == neighborhoods.features.length) {
-      // if have gone through all neighborhoods and can't find, use Mapzen reverse
-      // geocoder to pull a neighborhood name
-      $.ajax({
-          url: reverse_url,
-          data: {
-            api_key: mapzen_key,
-            "point.lat": pos.lat,
-            "point.lon": pos.lon
-          },
-          dataType: "json",
-          success: function (data) {
-            if (data.features.length > 0) {
-              var neighborhood = data.features[0].properties.neighbourhood;
-              // check to make sure neighborhood is defined, display if so
-              if (typeof neighborhood !== "undefined") {
-                answerElement.innerHTML = "You are in " + '<b>' + neighborhood + '</b>.';
-              }
-              else {
-                answerElement.innerHTML = "Neighborhood can't be found";
-              }
-            }
-            else {
-              answerElement.innerHTML = "Neighborhood can't be found";
-            }
-          }
-      });
-    }
-    else if (turf.inside(pt, neighborhoods.features[i])) {
-      answerElement.innerHTML = "You are in " + '<b>' + neighborhoods.features[i].properties.name + '</b>.';
-      break;
-    }
-  };
-};
-
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','//www.google-analytics.com/analytics.js','ga');ga('create', 'UA-40976307-2', 'wnaii.com');ga('send', 'pageview');
