@@ -80,8 +80,8 @@ function loadGeolocation() {
 
 	const options = {
 		enableHighAccuracy: true,
-		timeout: 5000,
-		maximumAge: 0
+		timeout: 60000, // 1 minute
+		maximumAge: 60000, // 1 minute
 	};
 
 	navigator.geolocation.getCurrentPosition(success, error, options);
