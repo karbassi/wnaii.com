@@ -61,7 +61,7 @@ function searchNeighborhoods() {
 			loadingElement.style.display = 'none';
 			resultsElement.style.display = 'block';
 
-			locationElement.innerText = feature.properties.name;
+			locationElement.innerText = feature.properties.Name;
 			break;
 		}
 	}
@@ -88,19 +88,18 @@ function loadGeolocation() {
 }
 
 function parseGeoDate(data) {
-	neighborhoods = data.data;
+	neighborhoods = data;
 
 	function onEachFeature(feature, layer) {
 		layer.bindPopup(
-			`<strong>Neighborhood:</strong> ${feature.properties.name}`
+			`<strong>Neighborhood:</strong> ${feature.properties.Name}`
 		);
 	}
 
 	const chigeo = L.geoJson(neighborhoods, {
 		style: {
-			color: '#ff0000',
-			weight: 1.5,
-			opacity: 0.65
+			color: 'rgba(255, 0, 0, 0.4)',
+			weight: 1.5
 		},
 		onEachFeature
 	});
