@@ -1,4 +1,4 @@
-const DATA_URL = 'geojson/chicago.geojson';
+const IP_URL = 'https://ipapi.co/json/';
 
 let focusLat = 41.88;
 let focusLon = -87.63;
@@ -27,6 +27,28 @@ function createMap() {
 	markerLayer = L.geoJson().addTo(map);
 }
 
+function loadGeoJSON(url) {
+	// console.log(`Loading "${url}"`);
+
+	fetch(url)
+		.then(response => response.json())
+		.then(parseGeoDate);
+}
+
+function ipLookUp () {
+	// console.log("Getting ip-based location.");
+
+	fetch(IP_URL)
+		.then(response => response.json())
+		.then((response) => {
+			// console.log(response);
+
+			let state = (response.region_code || "").toLowerCase()
+			url = `geojson/${state}.geojson`;
+
+			loadGeoJSON(url);
+		});
+}
 
 function searchNeighborhoods() {
 
@@ -114,14 +136,13 @@ function parseGeoDate(data) {
 	L.control.layers(null, overlay).addTo(map);
 }
 
-createMap();
+function init() {
+	createMap();
+	ipLookUp();
 
-// Use HTML5 geolocation on page load, otherwise throw error
-window.addEventListener('load', () => {
 	// Load geolocation check
 	loadGeolocation();
+}
 
-	fetch(DATA_URL)
-		.then(response => response.json())
-		.then(parseGeoDate);
-});
+// Use HTML5 geolocation on page load, otherwise throw error
+window.addEventListener('load', init);
