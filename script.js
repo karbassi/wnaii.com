@@ -1,4 +1,4 @@
-const DATA_URL = 'https://api.everyblock.com/gis/chicago/neighborhoods/?token=0d872f36b2dfaa25bd2d0d6382022b47ed53078f';
+const DATA_URL = 'geojson/chicago.geojson';
 
 let focusLat = 41.88;
 let focusLon = -87.63;
