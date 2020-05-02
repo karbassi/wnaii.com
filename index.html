@@ -9,15 +9,15 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet.min.css" />
 </head>
 <body>
-  <div id="map"></div>
-  <div id="geo-result">
-    <span id="loading">Finding you...</span>
-    <span id="found">You're in <span id="location"></span></span>
+  <div class="map" id="map"></div>
+  <div class="geo-result">
+    <span class="loading">Finding you...</span>
+    <span class="found">You're in <span class="location"></span></span>
   </div>
 
-  <script async src="https://cdn.jsdelivr.net/npm/leaflet@1.5.1/dist/leaflet-src.min.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/leaflet@1.6/dist/leaflet-src.min.js"></script>
   <script async src="https://cdn.jsdelivr.net/npm/geojson-utils@1.1.0/geojson-utils.min.js"></script>
-  <script async src="./assets/js/script.js"></script>
+  <script async defer src="./assets/js/script.js"></script>
   <script>
     (function (i, s, o, g, r, a, m) {
       i.GoogleAnalyticsObject = r;

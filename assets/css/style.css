@@ -1,32 +1,34 @@
-html, body, #map {
-    height: 100%;
-    font-family: system-ui;
-    font-weight: normal;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+html,
+body,
+.map {
+  height: 100%;
+  font-family: system-ui;
+  font-weight: normal;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-#geo-result {
-    box-sizing: border-box;
-    font-size: 40px;
-    position: absolute;
-    z-index: 9999;
-    bottom: 0;
-    width: 100%;
-    margin: 0 auto;
-    padding: 20px;
-    text-align: center;
-    background: rgba(255, 255, 255, .75);
+.geo-result {
+  box-sizing: border-box;
+  font-size: 40px;
+  position: absolute;
+  z-index: 9999;
+  bottom: 0;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.75);
 }
 
-#found {
-    display: none;
+.found {
+  display: none;
 }
 
-#location {
-    display: inline-block;
-    margin: -10px;
-    padding: 10px;
-    background: rgba(255, 255, 0, .5);
+.location {
+  display: inline-block;
+  margin: -10px;
+  padding: 10px;
+  background: rgba(255, 255, 0, 0.5);
 }
