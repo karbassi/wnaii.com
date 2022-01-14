@@ -3,61 +3,61 @@ const center = {
   lon: -87.63,
 };
 
-const loadingElement = document.querySelector(".loading");
-const resultsElement = document.querySelector(".found");
-const locationElement = document.querySelector(".location");
+const loadingElement = document.querySelector('.loading');
+const resultsElement = document.querySelector('.found');
+const locationElement = document.querySelector('.location');
 const states_hash = {
-  Alabama: "AL",
-  Alaska: "AK",
-  Arizona: "AZ",
-  Arkansas: "AR",
-  California: "CA",
-  Colorado: "CO",
-  Connecticut: "CT",
-  Delaware: "DE",
-  "District Of Columbia": "DC",
-  Florida: "FL",
-  Georgia: "GA",
-  Hawaii: "HI",
-  Idaho: "ID",
-  Illinois: "IL",
-  Indiana: "IN",
-  Iowa: "IA",
-  Kansas: "KS",
-  Kentucky: "KY",
-  Louisiana: "LA",
-  Maine: "ME",
-  Maryland: "MD",
-  Massachusetts: "MA",
-  Michigan: "MI",
-  Minnesota: "MN",
-  Mississippi: "MS",
-  Missouri: "MO",
-  Montana: "MT",
-  Nebraska: "NE",
-  Nevada: "NV",
-  "New Hampshire": "NH",
-  "New Jersey": "NJ",
-  "New Mexico": "NM",
-  "New York": "NY",
-  "North Carolina": "NC",
-  "North Dakota": "ND",
-  Ohio: "OH",
-  Oklahoma: "OK",
-  Oregon: "OR",
-  Pennsylvania: "PA",
-  "Rhode Island": "RI",
-  "South Carolina": "SC",
-  "South Dakota": "SD",
-  Tennessee: "TN",
-  Texas: "TX",
-  Utah: "UT",
-  Vermont: "VT",
-  Virginia: "VA",
-  Washington: "WA",
-  "West Virginia": "WV",
-  Wisconsin: "WI",
-  Wyoming: "WY",
+  Alabama: 'AL',
+  Alaska: 'AK',
+  Arizona: 'AZ',
+  Arkansas: 'AR',
+  California: 'CA',
+  Colorado: 'CO',
+  Connecticut: 'CT',
+  Delaware: 'DE',
+  'District Of Columbia': 'DC',
+  Florida: 'FL',
+  Georgia: 'GA',
+  Hawaii: 'HI',
+  Idaho: 'ID',
+  Illinois: 'IL',
+  Indiana: 'IN',
+  Iowa: 'IA',
+  Kansas: 'KS',
+  Kentucky: 'KY',
+  Louisiana: 'LA',
+  Maine: 'ME',
+  Maryland: 'MD',
+  Massachusetts: 'MA',
+  Michigan: 'MI',
+  Minnesota: 'MN',
+  Mississippi: 'MS',
+  Missouri: 'MO',
+  Montana: 'MT',
+  Nebraska: 'NE',
+  Nevada: 'NV',
+  'New Hampshire': 'NH',
+  'New Jersey': 'NJ',
+  'New Mexico': 'NM',
+  'New York': 'NY',
+  'North Carolina': 'NC',
+  'North Dakota': 'ND',
+  Ohio: 'OH',
+  Oklahoma: 'OK',
+  Oregon: 'OR',
+  Pennsylvania: 'PA',
+  'Rhode Island': 'RI',
+  'South Carolina': 'SC',
+  'South Dakota': 'SD',
+  Tennessee: 'TN',
+  Texas: 'TX',
+  Utah: 'UT',
+  Vermont: 'VT',
+  Virginia: 'VA',
+  Washington: 'WA',
+  'West Virginia': 'WV',
+  Wisconsin: 'WI',
+  Wyoming: 'WY',
 };
 
 let map;
@@ -65,7 +65,7 @@ let point;
 let markerLayer;
 
 // Use HTML5 geolocation on page load, otherwise throw error
-window.addEventListener("load", init);
+window.addEventListener('load', init);
 
 function init() {
   createMap(center.lat, center.lon);
@@ -73,13 +73,13 @@ function init() {
 }
 
 function createMap(lat, lon) {
-  map = L.map("map", {
+  map = L.map('map', {
     center: [lat, lon],
     zoom: 15,
     attributionControl: false,
   });
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
   markerLayer = L.geoJson().addTo(map);
 }
@@ -127,7 +127,7 @@ function reverseGeo(lat, lon) {
 }
 
 function loadGeoJSON(state) {
-  const URL = `./assets/geo/${state.toLowerCase()}.geojson`;
+  const URL = `./assets/geo/${state.toLowerCase()}.min.geojson`;
 
   fetch(URL)
     .then((response) => response.json())
@@ -143,7 +143,7 @@ function loadGeoJSON(state) {
 function parseGeoData(neighborhoods) {
   const geo = L.geoJson(neighborhoods, {
     style: {
-      color: "rgba(255, 0, 0, 0.4)",
+      color: 'rgba(255, 0, 0, 0.4)',
       weight: 1.5,
     },
     function(feature, layer) {
@@ -165,12 +165,12 @@ function parseGeoData(neighborhoods) {
 function createPoint(lat, lon) {
   // Create arbitrary geoJSON point to submit to turfjs function
   point = {
-    type: "Feature",
+    type: 'Feature',
     properties: {
-      "marker-color": "#00FF00",
+      'marker-color': '#00FF00',
     },
     geometry: {
-      type: "Point",
+      type: 'Point',
       coordinates: [lon, lat],
     },
   };
@@ -184,8 +184,8 @@ function searchNeighborhoods(neighborhoods) {
     const feature = neighborhoods.features[i];
     if (gju.pointInPolygon(point.geometry, feature.geometry)) {
       // Get var of p tag that will hold neighborhood answer
-      loadingElement.style.display = "none";
-      resultsElement.style.display = "block";
+      loadingElement.style.display = 'none';
+      resultsElement.style.display = 'block';
 
       locationElement.innerText = feature.properties.Name;
       break;
