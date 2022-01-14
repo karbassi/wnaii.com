@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>What neighborhood am I in?</title>
+    <style>
+        :root {
+            --bg: #f1f3f4;
+            --text: #202124;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #202124;
+                --text: #FFF;
+            }
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            font-size: 10px;
+            color: var(--text);
+            background-color: var(--bg);
+            display: grid;
+            place-items: center;
+            margin: 0;
+            text-align: center;
+        }
+
+
+        div {
+            font-size: clamp(10em, 2em, 30em);
+        }
+    </style>
+</head>
+<body>
+    <div>Finding you...</div>
+
+    <script>
+        const $out = document.querySelector('div');
+
+        navigator.geolocation.getCurrentPosition(
+            ({
+                coords: {
+                    latitude,
+                    longitude
+                }
+            }) => {
+
+                fetch(
+                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+                    )
+                    .then((response) => response.json())
+                    .then((data) => {
+                        $out.innerText = data.locality;
+                    })
+                    .catch((error) => console.error(error));
+            },
+            (err) => console.error(`ERROR(${err.code}): ${err.message}`), {
+                enableHighAccuracy: false,
+                timeout: 5000,
+                maximumAge: 0,
+            }
+        );
+    </script>
+</body>
+</html>
