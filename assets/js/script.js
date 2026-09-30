@@ -81,7 +81,7 @@ function createMap(lat, lon) {
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-  markerLayer = L.geoJson().addTo(map);
+  markerLayer = L.geoJSON().addTo(map);
 }
 
 function getGeolocation() {
@@ -176,7 +176,7 @@ function loadGeoJSON(state) {
 }
 
 function parseGeoData(neighborhoods) {
-  const geo = L.geoJson(neighborhoods, {
+  const geo = L.geoJSON(neighborhoods, {
     style: {
       color: 'rgba(255, 0, 0, 0.4)',
       weight: 1.5,
