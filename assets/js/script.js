@@ -64,7 +64,7 @@ let map;
 let point;
 let markerLayer;
 
-// Use HTML5 geolocation on page load, otherwise throw error
+// Use HTML5 geolocation on page load
 window.addEventListener('load', init);
 
 function init() {
@@ -198,12 +198,10 @@ function parseGeoData(neighborhoods) {
 }
 
 function createPoint(lat, lon) {
-  // Create arbitrary geoJSON point to submit to turfjs function
+  // GeoJSON point used for the marker and the point-in-polygon search
   point = {
     type: 'Feature',
-    properties: {
-      'marker-color': '#00FF00',
-    },
+    properties: {},
     geometry: {
       type: 'Point',
       coordinates: [lon, lat],
@@ -214,11 +212,10 @@ function createPoint(lat, lon) {
 }
 
 function searchNeighborhoods(neighborhoods) {
-  // Loop through all GeoJSON features, break if one selected, and change answerElement
+  // Show the first neighborhood that contains the point
   for (let i = 0; i < neighborhoods.features.length; i++) {
     const feature = neighborhoods.features[i];
     if (gju.pointInPolygon(point.geometry, feature.geometry)) {
-      // Get var of p tag that will hold neighborhood answer
       loadingElement.style.display = 'none';
       resultsElement.style.display = 'block';
 
