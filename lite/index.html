@@ -41,7 +41,9 @@
     <script>
         const $out = document.querySelector('div');
 
-        navigator.geolocation.getCurrentPosition(
+        if (!navigator.geolocation) {
+            $out.innerText = "Your browser doesn't support location services.";
+        } else navigator.geolocation.getCurrentPosition(
             ({
                 coords: {
                     latitude,
@@ -51,11 +53,17 @@
                 fetch(
                         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
                     )
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (!response.ok) throw new Error(`Reverse geocode failed: ${response.status}`);
+                        return response.json();
+                    })
                     .then((data) => {
                         $out.innerText = data.locality;
                     })
-                    .catch((error) => console.error(error));
+                    .catch((error) => {
+                        console.error(error);
+                        $out.innerText = "Sorry, we couldn't look up your location.";
+                    });
             },
             (error) => {
                 switch (error.code) {
