@@ -11,8 +11,9 @@ let map;
 let point;
 let markerLayer;
 
-// Use HTML5 geolocation on page load
-window.addEventListener('load', init);
+// Scripts are deferred, so Leaflet and geojson-utils have already run.
+// Don't wait for window load: Cloudflare Rocket Loader can run this after it.
+init();
 
 function init() {
   createMap(center.lat, center.lon);
