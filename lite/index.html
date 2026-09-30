@@ -49,7 +49,7 @@
                 }
             }) => {
                 fetch(
-                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}`
+                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
                     )
                     .then((response) => response.json())
                     .then((data) => {

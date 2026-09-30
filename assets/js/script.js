@@ -132,8 +132,7 @@ function centerMap(lat, lon) {
 }
 
 function reverseGeo(lat, lon) {
-  const URL = `https://api.bigdatacloud.net/data/reverse-geocode-client
-				?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+  const URL = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
 
   fetch(URL)
     .then((response) => {
