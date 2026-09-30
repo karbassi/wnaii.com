@@ -102,9 +102,29 @@ function getGeolocation() {
 
   const error = function (err) {
     console.error(`ERROR(${err.code}): ${err.message}`);
+
+    switch (err.code) {
+      case err.PERMISSION_DENIED:
+        showMessage('Please enable location services for this site in your browser settings.');
+        break;
+      case err.TIMEOUT:
+        showMessage('Finding your location timed out. Reload to try again.');
+        break;
+      default:
+        showMessage('Location information is unavailable.');
+    }
   };
 
+  if (!navigator.geolocation) {
+    showMessage("Your browser doesn't support location services.");
+    return;
+  }
+
   navigator.geolocation.getCurrentPosition(success, error, options);
+}
+
+function showMessage(message) {
+  loadingElement.innerText = message;
 }
 
 function centerMap(lat, lon) {
@@ -116,15 +136,25 @@ function reverseGeo(lat, lon) {
 				?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
 
   fetch(URL)
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) throw new Error(`Reverse geocode failed: ${response.status}`);
+      return response.json();
+    })
     .then((data) => {
       // BigDataCloud reports Puerto Rico as its own country
       const state =
         data.countryCode === 'PR' ? 'PR' : states_hash[data.principalSubdivision];
+
+      if (!state || !['US', 'PR'].includes(data.countryCode)) {
+        showMessage('Sorry, only US neighborhoods are supported.');
+        return;
+      }
+
       loadGeoJSON(state);
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
+      showMessage("Sorry, we couldn't look up your location.");
     });
 }
 
@@ -132,13 +162,17 @@ function loadGeoJSON(state) {
   const URL = `./assets/geo/${state.toLowerCase()}.min.geojson`;
 
   fetch(URL)
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) throw new Error(`No neighborhood data for ${state}`);
+      return response.json();
+    })
     .then((neighborhoods) => {
       parseGeoData(neighborhoods);
       searchNeighborhoods(neighborhoods);
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
+      showMessage("Sorry, we don't have neighborhood data for your state yet.");
     });
 }
 
@@ -190,7 +224,9 @@ function searchNeighborhoods(neighborhoods) {
       resultsElement.style.display = 'block';
 
       locationElement.innerText = feature.properties.Name;
-      break;
+      return;
     }
   }
+
+  showMessage("You're not inside any neighborhood we know about.");
 }
