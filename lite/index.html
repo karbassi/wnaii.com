@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://api.bigdatacloud.net" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <title>What neighborhood am I in?</title>
     <style>
         html,
@@ -12,6 +13,7 @@
         }
 
         body {
+            margin: 0;
             font-size: 10px;
             background-color: #f1f3f4;
             color: #202124;
@@ -38,39 +40,71 @@
 <body>
     <div>Finding what neighborhood you're in.</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/geojson-utils@1.1.0/geojson-utils.min.js"></script>
+    <script src="../assets/js/states.js"></script>
     <script>
         const $out = document.querySelector('div');
 
-        navigator.geolocation.getCurrentPosition(
+        const show = (message) => {
+            $out.innerText = message;
+        };
+
+        const fail = (message) => (error) => {
+            console.error(error);
+            show(message);
+        };
+
+        const findNeighborhood = (latitude, longitude) => {
+            fetch(
+                    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+                )
+                .then((response) => {
+                    if (!response.ok) throw new Error(`Reverse geocode failed: ${response.status}`);
+                    return response.json();
+                })
+                .then((data) => {
+                    const state = stateCode(data);
+
+                    if (!state) {
+                        show('Sorry, only US neighborhoods are supported.');
+                        return;
+                    }
+
+                    return fetch(`../assets/geo/${state.toLowerCase()}.min.geojson`)
+                        .then((response) => {
+                            if (!response.ok) throw new Error(`No neighborhood data for ${state}`);
+                            return response.json();
+                        })
+                        .then(({ features }) => {
+                            const point = { type: 'Point', coordinates: [longitude, latitude] };
+                            const feature = features.find((f) => gju.pointInPolygon(point, f.geometry));
+
+                            show(feature ? feature.properties.Name : "You're not inside any neighborhood we know about.");
+                        })
+                        .catch(fail("Sorry, we don't have neighborhood data for your state yet."));
+                })
+                .catch(fail("Sorry, we couldn't look up your location."));
+        };
+
+        if (!navigator.geolocation) {
+            show("Your browser doesn't support location services.");
+        } else navigator.geolocation.getCurrentPosition(
             ({
                 coords: {
                     latitude,
                     longitude
                 }
-            }) => {
-                fetch(
-                        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}`
-                    )
-                    .then((response) => response.json())
-                    .then((data) => {
-                        $out.innerText = data.locality;
-                    })
-                    .catch((error) => console.error(error));
-            },
+            }) => findNeighborhood(latitude, longitude),
             (error) => {
                 switch (error.code) {
                     case GeolocationPositionError.TIMEOUT:
-                        // Handle timeout.
-                        $out.innerText = 'Timeout';
+                        show('Finding your location timed out. Reload to try again.');
                         break;
                     case GeolocationPositionError.PERMISSION_DENIED:
-                        // User denied the request.
-                        $out.innerText = 'Please enable location services for this app in your browser settings.';
+                        show('Please enable location services for this site in your browser settings.');
                         break;
-                    case GeolocationPositionError.POSITION_UNAVAILABLE:
-                        // Position not available.
-                        $out.innerText = 'Location information is unavailable.';
-                        break;
+                    default:
+                        show('Location information is unavailable.');
                 }
             }, {
                 enableHighAccuracy: false,
