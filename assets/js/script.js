@@ -15,7 +15,7 @@ const states_hash = {
   Colorado: 'CO',
   Connecticut: 'CT',
   Delaware: 'DE',
-  'District Of Columbia': 'DC',
+  'District of Columbia': 'DC',
   Florida: 'FL',
   Georgia: 'GA',
   Hawaii: 'HI',
@@ -118,7 +118,9 @@ function reverseGeo(lat, lon) {
   fetch(URL)
     .then((response) => response.json())
     .then((data) => {
-      const state = states_hash[data.principalSubdivision];
+      // BigDataCloud reports Puerto Rico as its own country
+      const state =
+        data.countryCode === 'PR' ? 'PR' : states_hash[data.principalSubdivision];
       loadGeoJSON(state);
     })
     .catch((error) => {
