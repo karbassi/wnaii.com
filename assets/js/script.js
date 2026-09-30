@@ -148,7 +148,7 @@ function parseGeoData(neighborhoods) {
       color: 'rgba(255, 0, 0, 0.4)',
       weight: 1.5,
     },
-    function(feature, layer) {
+    onEachFeature(feature, layer) {
       layer.bindPopup(
         `<strong>Neighborhood:</strong> ${feature.properties.Name}`
       );
